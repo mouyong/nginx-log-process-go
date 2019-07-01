@@ -1,0 +1,37 @@
+version: "3"
+
+networks:
+  log:
+    driver: "bridge"
+
+volumes:
+  influxdb:
+    driver: "local"
+
+services:
+  grafana:
+    image: "grafana/grafana"
+    ports:
+      - "8080:3000"
+    links:
+      - influxdb
+    environment:
+      - influxdb-url:http://192.168.99.100:9999
+
+  influxdb:
+    image: "quay.io/influxdb/influxdb:2.0.0-alpha"
+    ports:
+      - "9999:9999"
+    volumes:
+      - influxdb
+
+  chronograf:
+    image: "quay.io/influxdb/chronograf:1.7.12"
+    ports:
+      - "8888:8888"
+    links:
+      - influxdb
+    environment:
+      - influxdb-url:http://192.168.99.100:9999
+    depends_on:
+      - influxdb
