@@ -1,9 +1,5 @@
 version: "3"
 
-networks:
-  log:
-    driver: "bridge"
-
 volumes:
   influxdb:
     driver: "local"
@@ -11,12 +7,13 @@ volumes:
 services:
   grafana:
     image: "grafana/grafana"
+#    context: ./grafana
     ports:
       - "8080:3000"
+    environment:
+      - INFLUXDB_URL=http://influxdb:9999
     links:
       - influxdb
-    environment:
-      - influxdb-url:http://192.168.99.100:9999
 
   influxdb:
     image: "quay.io/influxdb/influxdb:2.0.0-alpha"
@@ -26,12 +23,14 @@ services:
       - influxdb
 
   chronograf:
-    image: "quay.io/influxdb/chronograf:1.7.12"
+#    image: "quay.io/influxdb/chronograf:1.7.12"
+    image: chronograf
     ports:
       - "8888:8888"
     links:
       - influxdb
     environment:
-      - influxdb-url:http://192.168.99.100:9999
-    depends_on:
-      - influxdb
+      - INFLUXDB_URL=http://influxdb:9999
+      - INFLUXDB_USERNAME=admin
+      - INFLUXDB_PASSWORD=12345678
+      - LOG_LEVEL=debug
